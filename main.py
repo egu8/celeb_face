@@ -2,6 +2,21 @@ import transforms as T
 from fine_tune import get_model_object_segmentation
 from kaggle_dataset import KaggleDataset
 import torch
+import matplotlib.pyplot as plt
+import torchvision
+
+
+NUM_CLASSES = 6
+
+MODEL_WEIGHTS = "saved_weights/RNN_detector_epoch_6"
+
+identity_mapping = {
+    1: "ben_afflek",
+    2: "elton_john",
+    3: "jerry_seinfeld",
+    4: "madonna",
+    5: "mindy_kaling"
+}
 
 def get_transform(train):
     transforms = []
@@ -18,7 +33,7 @@ def train():
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    num_classes = 5
+    num_classes = NUM_CLASSES
     # use our dataset and defined transformations
     dataset = KaggleDataset('data/train', get_transform(train=True))
     dataset_test = KaggleDataset('data/val', get_transform(train=False))
@@ -43,8 +58,7 @@ def train():
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=0.005,
-                                momentum=0.9, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(params, lr=0.0005, weight_decay=0.0005)
     # and a learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                    step_size=3,
@@ -64,12 +78,9 @@ def train():
         # Save model weights
         torch.save(model.state_dict(), "saved_weights/RNN_detector_epoch_{}".format(epoch))
 
-
-MODEL_WEIGHTS = "saved_weights/RNN_detector_epoch_6"
-
 def evaluate_pic(pic):
     # get the model using our helper function
-    model = get_model_object_segmentation(5)
+    model = get_model_object_segmentation(NUM_CLASSES)
 
     model.load_state_dict(torch.load(MODEL_WEIGHTS))
     model.eval()
@@ -77,34 +88,29 @@ def evaluate_pic(pic):
     x = T.ToTensor()(pic)[0].unsqueeze_(0)
     predictions = model(x)
 
-    print(predictions)
+    boxes = predictions[0]['boxes']
+    labels = predictions[0]['labels']
+    scores = predictions[0]['scores']
+
+    img = x[0] * 255
+    img =torch.tensor(img,dtype=torch.uint8)
+
+    str_label = []
+    for label in labels:
+        str_label.append(identity_mapping[label.item()])
+
+    a=torchvision.utils.draw_bounding_boxes(image=img,boxes=boxes, labels=str_label)
+    a=a.permute(1,2,0)
+    plt.imshow(a)
+    plt.show()
 
 
 if __name__ == "__main__":
-    from PIL import Image
-    img = Image.open("data/train/pictures/httpgonetworthcomwpcontentuploadsthumbsjpg.jpg").convert("RGB")
-    evaluate_pic(img)
 
-    # train()
-    # model = get_model_object_segmentation(5)
+    # # Evaluate on one image
+    # from PIL import Image
+    # img = Image.open("mindy-kaling-bj-novak-removebg.png").convert("RGB")
+    # evaluate_pic(img)
 
-    # dataset = KaggleDataset('data/train', get_transform(train=True))
-    # data_loader = torch.utils.data.DataLoader(
-    # dataset, batch_size=2, shuffle=True,
-    # collate_fn=utils.collate_fn)
-
-    # # For Training
-    # images,targets = next(iter(data_loader))
-
-    # images = list(image for image in images)
-    # targets = [{k: v for k, v in t.items()} for t in targets]
-    # output = model(images,targets)   # Returns losses and detections
-
-    # print(output)
-
-    # # For inference
-    # model.eval()
-    # x = [torch.rand(3, 300, 400), torch.rand(3, 500, 400)]
-    # predictions = model(x)           # Returns predictions
-
-    # print(predictions)
+    # Train on image set
+    train()
