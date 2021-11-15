@@ -6,16 +6,16 @@ import matplotlib.pyplot as plt
 import torchvision
 
 
-NUM_CLASSES = 6
+NUM_CLASSES = 5
 
-MODEL_WEIGHTS = "saved_weights/RNN_detector_epoch_6"
+MODEL_WEIGHTS = "saved_weights/RNN_detector_epoch_7"
 
 identity_mapping = {
-    1: "ben_afflek",
-    2: "elton_john",
-    3: "jerry_seinfeld",
-    4: "madonna",
-    5: "mindy_kaling"
+    0: "ben_afflek",
+    1: "elton_john",
+    2: "jerry_seinfeld",
+    3: "madonna",
+    4: "mindy_kaling"
 }
 
 def get_transform(train):
@@ -58,7 +58,7 @@ def train():
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.Adam(params, lr=0.0005, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(params, lr=0.01)
     # and a learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                    step_size=3,
@@ -88,9 +88,9 @@ def evaluate_pic(pic):
     x = T.ToTensor()(pic)[0].unsqueeze_(0)
     predictions = model(x)
 
-    boxes = predictions[0]['boxes']
-    labels = predictions[0]['labels']
-    scores = predictions[0]['scores']
+    boxes = predictions[0]['boxes'][0:1]
+    labels = predictions[0]['labels'][0:1]
+    scores = predictions[0]['scores'][0:1]
 
     img = x[0] * 255
     img =torch.tensor(img,dtype=torch.uint8)
@@ -107,10 +107,10 @@ def evaluate_pic(pic):
 
 if __name__ == "__main__":
 
-    # # Evaluate on one image
-    # from PIL import Image
-    # img = Image.open("mindy-kaling-bj-novak-removebg.png").convert("RGB")
-    # evaluate_pic(img)
+    # Evaluate on one image
+    from PIL import Image
+    img = Image.open("data/train/pictures/httppixelnymagcomimgsfashiondailymindykalingwhjpg.jpg").convert("RGB")
+    evaluate_pic(img)
 
-    # Train on image set
-    train()
+    # # Train on image set
+    # train()

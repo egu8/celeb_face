@@ -6,11 +6,11 @@ from PIL import Image
 
 
 identity_mapping = {
-    "ben_afflek": 1,
-    "elton_john": 2,
-    "jerry_seinfeld": 3,
-    "madonna":4,
-    "mindy_kaling":5
+    "ben_afflek": 0,
+    "elton_john": 1,
+    "jerry_seinfeld": 2,
+    "madonna":3,
+    "mindy_kaling":4
 }
 
 
