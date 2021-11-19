@@ -1,14 +1,15 @@
 import transforms as T
 from fine_tune import get_model_object_segmentation
 from kaggle_dataset import KaggleDataset
+from celeba_dataset import CelebaDataset
 import torch
 import matplotlib.pyplot as plt
 import torchvision
 
 
-NUM_CLASSES = 5
+NUM_CLASSES = 2362
 
-MODEL_WEIGHTS = "saved_weights/RNN_detector_epoch_7"
+MODEL_WEIGHTS = "saved_weights/RNN_detector_best"
 
 identity_mapping = {
     0: "ben_afflek",
@@ -35,8 +36,12 @@ def train():
 
     num_classes = NUM_CLASSES
     # use our dataset and defined transformations
-    dataset = KaggleDataset('data/train', get_transform(train=True))
-    dataset_test = KaggleDataset('data/val', get_transform(train=False))
+    dataset = CelebaDataset('img_celeba_data/train', "img_celeba", get_transform(train=True))
+    dataset_test = CelebaDataset('img_celeba_data/val', "img_celeba", get_transform(train=False))
+
+    # # use our dataset and defined transformations
+    # dataset = KaggleDataset('kaggle_data/train', get_transform(train=True))
+    # dataset_test = KaggleDataset('kaggle_data/val', get_transform(train=False))
 
     # dataset = torch.utils.data.Subset(dataset, torch.arange(5))
     # dataset_test = torch.utils.data.Subset(dataset_test, torch.arange(2))
@@ -52,13 +57,14 @@ def train():
 
     # get the model using our helper function
     model = get_model_object_segmentation(num_classes)
+    # model.load_state_dict(torch.load(MODEL_WEIGHTS))
 
     # move model to the right device
     model.to(device)
 
     # construct an optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.Adam(params, lr=0.01)
+    optimizer = torch.optim.Adam(params, lr=1e-4)
     # and a learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                    step_size=3,
@@ -108,9 +114,9 @@ def evaluate_pic(pic):
 if __name__ == "__main__":
 
     # Evaluate on one image
-    from PIL import Image
-    img = Image.open("data/train/pictures/httppixelnymagcomimgsfashiondailymindykalingwhjpg.jpg").convert("RGB")
-    evaluate_pic(img)
+    # from PIL import Image
+    # img = Image.open("test_images/mindy-kaling-bj-novak-removebg.png").convert("RGB")
+    # evaluate_pic(img)
 
-    # # Train on image set
-    # train()
+    # Train on image set
+    train()
