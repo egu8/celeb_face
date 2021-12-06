@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import torchvision
 
 
-NUM_CLASSES = 2362
+NUM_CLASSES = 5
 
 MODEL_WEIGHTS = "saved_weights/RNN_detector_best"
 
@@ -35,13 +35,13 @@ def train():
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     num_classes = NUM_CLASSES
-    # use our dataset and defined transformations
-    dataset = CelebaDataset('img_celeba_data/train', "img_celeba", get_transform(train=True))
-    dataset_test = CelebaDataset('img_celeba_data/val', "img_celeba", get_transform(train=False))
-
     # # use our dataset and defined transformations
-    # dataset = KaggleDataset('kaggle_data/train', get_transform(train=True))
-    # dataset_test = KaggleDataset('kaggle_data/val', get_transform(train=False))
+    # dataset = CelebaDataset('img_celeba_data/train', "img_celeba", get_transform(train=True))
+    # dataset_test = CelebaDataset('img_celeba_data/val', "img_celeba", get_transform(train=False))
+
+    # use our dataset and defined transformations
+    dataset = KaggleDataset('kaggle_data/train', get_transform(train=True))
+    dataset_test = KaggleDataset('kaggle_data/val', get_transform(train=False))
 
     # dataset = torch.utils.data.Subset(dataset, torch.arange(5))
     # dataset_test = torch.utils.data.Subset(dataset_test, torch.arange(2))
@@ -114,9 +114,9 @@ def evaluate_pic(pic):
 if __name__ == "__main__":
 
     # Evaluate on one image
-    # from PIL import Image
-    # img = Image.open("test_images/mindy-kaling-bj-novak-removebg.png").convert("RGB")
-    # evaluate_pic(img)
+    from PIL import Image
+    img = Image.open("test_images/jerry-seinfeld-season-10-interview.jpg").convert("RGB")
+    evaluate_pic(img)
 
-    # Train on image set
-    train()
+    # # Train on image set
+    # train()
