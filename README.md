@@ -28,5 +28,5 @@ python train.py
 To test a model for a given image, run the following command
 
 ```
-python validation.py - $path_to_image$
+python validation.py --path_to_img $path_to_image$
 ```
