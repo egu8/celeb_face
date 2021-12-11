@@ -12,7 +12,7 @@ This repo is the faster rcnn implementation of our facial recognition network. I
 - After installation, run
 
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Training
